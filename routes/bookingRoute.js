@@ -51,13 +51,14 @@ router.get('/graph/:id', (req, res) => {
     const id = req.params.id;
     const width = 800;
     const height = 400;
+    const boxHeight = 60; // Height of the information box
 
     const d3n = new D3Node();
 
-    const svg = d3n.createSVG(width, height);
+    const svg = d3n.createSVG(width, height + boxHeight); // Adjusting height for the box
 
     // Fetch data from the captured_packets table based on the provided ID
-    const selectQuery = "SELECT source, destination FROM captured_packets WHERE id = ?";
+    const selectQuery = "SELECT protocol, source, destination FROM captured_packets WHERE id = ?";
 
     db.get(selectQuery, [id], (err, row) => {
         if (err) {
@@ -68,17 +69,25 @@ router.get('/graph/:id', (req, res) => {
             return res.status(404).json({ error: "Data not found for the provided ID" });
         }
 
-        const data = [
-            { label: 'Source', value: row.source },
-          { label: 'Destination', value: row.destination },
-          
+        // Create a box for displaying information
+        svg.append('rect')
+            .attr('x', 0)
+            .attr('y', 0)
+            .attr('width', width)
+            .attr('height', boxHeight)
+            .attr('fill', '#f0f0f0');
 
-        ];
+        // Display protocol, source, and destination values in the box
+        svg.append('text')
+            .attr('x', 350)
+            .attr('y', 20)
+            .attr('font-size', '16px')
+            .text(`Protocol: ${row.protocol} `);
 
         // Create a line connecting source and destination
         const lineData = [
-            { x: 150, y: 200 }, // Source
-            { x: 750, y: 200 } // Destination
+            { x: 150, y: boxHeight }, // Source
+            { x: 650, y: boxHeight }  // Destination
         ];
 
         const line = d3n.d3.line()
@@ -95,11 +104,11 @@ router.get('/graph/:id', (req, res) => {
 
         // Display IP addresses at the end of the nodes
         svg.selectAll('.node-label')
-            .data(data)
+            .data([{ value: row.source }, { value: row.destination }])
             .enter().append('text')
             .attr('class', 'node-label')
             .attr('x', (d, i) => lineData[i].x)
-            .attr('y', (d, i) => lineData[i].y)
+            .attr('y', boxHeight)
             .attr('dy', -10) // Adjust the distance above the node
             .attr('text-anchor', (d, i) => i === 0 ? 'end' : 'start')
             .text(d => d.value);
@@ -110,6 +119,8 @@ router.get('/graph/:id', (req, res) => {
         res.status(200).send(svgString);
     });
 });
+
+
 
 
 

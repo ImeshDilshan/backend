@@ -20,6 +20,7 @@ app.use(cors());
 
 // Create a new booking
 router.get('/', (req, res) => {
+    req.header("Access-Control-Allow-Origin", "*");
     const selectQuery = "SELECT * FROM captured_packets";
 
     db.all(selectQuery, [], (err, rows) => {
@@ -32,6 +33,7 @@ router.get('/', (req, res) => {
 
 // Create a new captured packet
 router.post('/', (req, res) => {
+   
     const { protocol, source, destination, length } = req.body;
     const insertQuery = "INSERT INTO captured_packets (protocol, source, destination, length) VALUES (?, ?, ?, ?)";
 
@@ -49,9 +51,8 @@ router.post('/', (req, res) => {
 // ...
 
 // ...
-
 router.get('/graph/:id', (req, res) => {
-     res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Origin", "*");
     const id = req.params.id;
     const width = 800;
     const height = 400;
@@ -88,10 +89,10 @@ router.get('/graph/:id', (req, res) => {
             .attr('font-size', '16px')
             .text(`Protocol: ${row.protocol} `);
 
-        // Create a line connecting source and destination
+        // Create a diagonal line connecting source and destination
         const lineData = [
             { x: 150, y: boxHeight }, // Source
-            { x: 650, y: boxHeight }  // Destination
+            { x: 650, y: height + boxHeight }  // Destination
         ];
 
         const line = d3n.d3.line()
@@ -112,7 +113,7 @@ router.get('/graph/:id', (req, res) => {
             .enter().append('text')
             .attr('class', 'node-label')
             .attr('x', (d, i) => lineData[i].x)
-            .attr('y', boxHeight)
+            .attr('y', (d, i) => lineData[i].y)
             .attr('dy', -10) // Adjust the distance above the node
             .attr('text-anchor', (d, i) => i === 0 ? 'end' : 'start')
             .text(d => d.value);
@@ -123,6 +124,8 @@ router.get('/graph/:id', (req, res) => {
         res.status(200).send(svgString);
     });
 });
+
+
 
 
 

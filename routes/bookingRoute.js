@@ -1,6 +1,7 @@
 // bookingRoute.js
 
 const express = require('express');
+const cors = require('cors');
 const db = require('../db');
 // const router = express.Router();
 const { createCanvas } = require('canvas');
@@ -12,6 +13,8 @@ const D3Node = require('d3-node');
 // import * as d3 from 'd3';
 
 const router = express.Router();
+const app = express();
+app.use(cors());
 
 
 
@@ -48,6 +51,7 @@ router.post('/', (req, res) => {
 // ...
 
 router.get('/graph/:id', (req, res) => {
+     res.header("Access-Control-Allow-Origin", "*");
     const id = req.params.id;
     const width = 800;
     const height = 400;

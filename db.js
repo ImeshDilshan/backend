@@ -1,9 +1,11 @@
 const sqlite3 = require("sqlite3").verbose();
-const db = new sqlite3.Database('captured_packets.db');
+const path = require("path");
+const dbPath = path.join("C:", "Users", "Admin", "Downloads" , "captured_packets.db");
+const db = new sqlite3.Database(dbPath);
 
 // Define a schema and create a table (you can modify this based on your requirements)
 const createTableQuery = `
-    CREATE TABLE IF NOT EXISTS captured_packets (
+    CREATE TABLE IF NOT EXISTS packets (
        id INTEGER PRIMARY KEY AUTOINCREMENT,
         protocol TEXT,
          source TEXT,

@@ -21,7 +21,7 @@ app.use(cors());
 // Create a new booking
 router.get('/', (req, res) => {
     req.header("Access-Control-Allow-Origin", "*");
-    const selectQuery = "SELECT * FROM captured_packets";
+    const selectQuery = "SELECT * FROM packets";
 
     db.all(selectQuery, [], (err, rows) => {
         if (err) {
@@ -35,7 +35,7 @@ router.get('/', (req, res) => {
 router.post('/', (req, res) => {
    
     const { protocol, source, destination, length } = req.body;
-    const insertQuery = "INSERT INTO captured_packets (protocol, source, destination, length) VALUES (?, ?, ?, ?)";
+    const insertQuery = "INSERT INTO packets (protocol, source, destination, length) VALUES (?, ?, ?, ?)";
 
     db.run(insertQuery, [protocol, source, destination, length], function (err) {
         if (err) {
@@ -63,7 +63,7 @@ router.get('/graph/:id', (req, res) => {
     const svg = d3n.createSVG(width, height + boxHeight); // Adjusting height for the box
 
     // Fetch data from the captured_packets table based on the provided ID
-    const selectQuery = "SELECT protocol, source, destination FROM captured_packets WHERE id = ?";
+    const selectQuery = "SELECT protocol, source, destination FROM packets WHERE id = ?";
 
     db.get(selectQuery, [id], (err, row) => {
         if (err) {

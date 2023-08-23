@@ -2,7 +2,7 @@
 
 const express = require('express');
 const cors = require('cors');
-const db = require('../db');
+const { capturedPacketsDB } = require('../db');
 // const router = express.Router();
 const { createCanvas } = require('canvas');
 const Chart = require('chart.js');
@@ -19,11 +19,21 @@ app.use(cors());
 
 
 // Create a new booking
+// Modify your route to accept query parameters for pagination
 router.get('/', (req, res) => {
     req.header("Access-Control-Allow-Origin", "*");
-    const selectQuery = "SELECT * FROM packets";
+    
+    // Extract query parameters for pagination
+    const page = req.query.page || 1; // Default to page 1 if not specified
+    const perPage = 20; // Number of records per page
 
-    db.all(selectQuery, [], (err, rows) => {
+    // Calculate the offset based on the page number
+    const offset = (page - 1) * perPage;
+
+    // Modify your SQL query to include pagination
+    const selectQuery = "SELECT * FROM packets LIMIT ? OFFSET ?";
+
+    capturedPacketsDB.all(selectQuery, [perPage, offset], (err, rows) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
@@ -31,13 +41,14 @@ router.get('/', (req, res) => {
     });
 });
 
+
 // Create a new captured packet
 router.post('/', (req, res) => {
    
     const { protocol, source, destination, length } = req.body;
     const insertQuery = "INSERT INTO packets (protocol, source, destination, length) VALUES (?, ?, ?, ?)";
 
-    db.run(insertQuery, [protocol, source, destination, length], function (err) {
+     capturedPacketsDB.run(insertQuery, [protocol, source, destination, length], function (err) {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
@@ -65,7 +76,7 @@ router.get('/graph/:id', (req, res) => {
     // Fetch data from the captured_packets table based on the provided ID
     const selectQuery = "SELECT protocol, source, destination FROM packets WHERE id = ?";
 
-    db.get(selectQuery, [id], (err, row) => {
+      capturedPacketsDB.get(selectQuery, [id], (err, row) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }

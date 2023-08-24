@@ -64,15 +64,29 @@ router.get('/vulnerabilities-chart', async (req, res) => {
         const canvas = createCanvas(800, 400);
         const ctx = canvas.getContext('2d');
 
-        // Create a 3D pie chart using Chart.js
+        // Create a 3D-like doughnut chart using Chart.js
         new Chart(ctx, {
-            type: 'pie',
+            type: 'doughnut',
             data: {
                 labels: ['Critical', 'High', 'Medium', 'Low', 'Informational'],
                 datasets: [{
                     data: vulnerabilityCategories,
                     backgroundColor: ['red', 'orange', 'yellow', 'gray', 'lightgray'],
                 }],
+            },
+            options: {
+                cutout: '70%', // Adjust the cutout percentage for a donut effect
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                    },
+                },
+                elements: {
+                    arc: {
+                        borderWidth: 4, // Add a border to the doughnut segments
+                    },
+                },
             },
         });
 
@@ -94,7 +108,6 @@ router.get('/vulnerabilities-chart', async (req, res) => {
         });
     });
 });
-
 
 
 // Create a new booking

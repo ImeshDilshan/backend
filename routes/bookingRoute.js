@@ -3,10 +3,13 @@
 const express = require('express');
 const cors = require('cors');
 const { capturedPacketsDB } = require('../db');
+const { detectedVulnerabilitiesDB } = require('../db');
 // const router = express.Router();
 const { createCanvas } = require('canvas');
-const Chart = require('chart.js');
+const Chart = require('chart.js/auto');
 const D3Node = require('d3-node');
+const fs = require('fs');
+const path = require('path');
 // const d3 = require('d3');
   // import express from 'express';
 // import D3Node from 'd3-node';
@@ -15,6 +18,82 @@ const D3Node = require('d3-node');
 const router = express.Router();
 const app = express();
 app.use(cors());
+
+
+function categorizeVulnerabilities(vulnerabilities) {
+    const categories = {
+        Critical: 0,
+        High: 0,
+        Medium: 0,
+        Low: 0,
+        Informational: 0,
+    };
+
+    vulnerabilities.forEach((vulnerability) => {
+        if (vulnerability.vulnerability_info >= 9.0) {
+            categories.Critical++;
+        } else if (vulnerability.vulnerability_info >= 7.0) {
+            categories.High++;
+        } else if (vulnerability.vulnerability_info >= 4.0) {
+            categories.Medium++;
+        } else if (vulnerability.vulnerability_info >= 0.1) {
+            categories.Low++;
+        } else {
+            categories.Informational++;
+        }
+    });
+
+    return Object.values(categories);
+}
+
+router.get('/vulnerabilities-chart', async (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+
+    // Fetch data from the vulnerabilities table
+    const selectQuery = "SELECT vulnerability_info FROM vulnerabilities";
+
+    detectedVulnerabilitiesDB.all(selectQuery, (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+
+        // Categorize vulnerabilities
+        const vulnerabilityCategories = categorizeVulnerabilities(rows);
+
+        // Create a canvas for the chart
+        const canvas = createCanvas(800, 400);
+        const ctx = canvas.getContext('2d');
+
+        // Create a 3D pie chart using Chart.js
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Critical', 'High', 'Medium', 'Low', 'Informational'],
+                datasets: [{
+                    data: vulnerabilityCategories,
+                    backgroundColor: ['red', 'orange', 'yellow', 'gray', 'lightgray'],
+                }],
+            },
+        });
+
+        // Save the chart as an image file
+        const imageFileName = 'vulnerabilities-chart.png';
+        const directoryPath = 'D:\\express - Backend - Imesh\\backend'; // Specify the directory path
+        const imagePath = path.join(directoryPath, imageFileName);
+
+        const imageStream = fs.createWriteStream(imagePath);
+        const chartImage = canvas.createPNGStream();
+        chartImage.pipe(imageStream);
+
+        imageStream.on('finish', () => {
+            // Send the saved image file as a response
+            res.status(200).sendFile(imagePath, () => {
+                // Clean up: Delete the saved image file
+                fs.unlinkSync(imagePath);
+            });
+        });
+    });
+});
 
 
 
@@ -131,6 +210,59 @@ router.get('/graph/:id', (req, res) => {
 
         const svgString = d3n.svgString();
 
+        res.setHeader('Content-Type', 'image/svg+xml');
+        res.status(200).send(svgString);
+    });
+});
+
+
+router.get('/pie-chart', (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    
+    // Query the 'vulnerabilities' table to retrieve the data you need
+    const selectQuery = "SELECT protocol, COUNT(*) AS count FROM vulnerabilities GROUP BY protocol";
+
+    detectedVulnerabilitiesDB.all(selectQuery, [], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+
+        // Prepare the data for the pie chart
+        const data = rows.map(row => ({
+            label: row.protocol,
+            value: row.count
+        }));
+
+        // Create a D3Node instance to render the pie chart
+        const width = 800;
+        const height = 400;
+        const d3n = new D3Node();
+
+        // Create the pie chart using D3.js
+        const svg = d3n.createSVG(width, height);
+
+        const radius = Math.min(width, height) / 2;
+        const pie = d3n.d3.pie().value(d => d.value);
+        const arc = d3n.d3.arc().outerRadius(radius).innerRadius(radius / 2);
+
+        const color = d3n.d3.scaleOrdinal().domain(data.map(d => d.label)).range(d3n.d3.schemeCategory10);
+
+        const g = svg.append('g').attr('transform', `translate(${width / 2},${height / 2})`);
+
+        const arcs = g.selectAll('arc')
+            .data(pie(data))
+            .enter()
+            .append('g')
+            .attr('class', 'arc');
+
+        arcs.append('path')
+            .attr('d', arc)
+            .attr('fill', d => color(d.data.label));
+
+        // Convert the SVG to a string
+        const svgString = d3n.svgString();
+
+        // Send the SVG as a response
         res.setHeader('Content-Type', 'image/svg+xml');
         res.status(200).send(svgString);
     });

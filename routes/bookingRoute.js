@@ -64,15 +64,29 @@ router.get('/vulnerabilities-chart', async (req, res) => {
         const canvas = createCanvas(800, 400);
         const ctx = canvas.getContext('2d');
 
-        // Create a 3D pie chart using Chart.js
+        // Create a 3D-like doughnut chart using Chart.js
         new Chart(ctx, {
-            type: 'pie',
+            type: 'doughnut',
             data: {
                 labels: ['Critical', 'High', 'Medium', 'Low', 'Informational'],
                 datasets: [{
                     data: vulnerabilityCategories,
                     backgroundColor: ['red', 'orange', 'yellow', 'gray', 'lightgray'],
                 }],
+            },
+            options: {
+                cutout: '70%', // Adjust the cutout percentage for a donut effect
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                    },
+                },
+                elements: {
+                    arc: {
+                        borderWidth: 4, // Add a border to the doughnut segments
+                    },
+                },
             },
         });
 
@@ -95,6 +109,77 @@ router.get('/vulnerabilities-chart', async (req, res) => {
         });
     });
 });
+
+router.get('/pie-chart/:id', (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+
+    const id = req.params.id;
+
+    // Modify the SQL query to retrieve data based on the provided ID
+    const selectQuery = "SELECT protocol, COUNT(*) AS count, vulnerability_info FROM vulnerabilities WHERE id = ? GROUP BY protocol, vulnerability_info";
+
+    detectedVulnerabilitiesDB.all(selectQuery, [id], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+
+        // Define color mapping based on vulnerability severity
+        const colorMap = {
+            "Critical": "red",
+            "High": "orange",
+            "Medium": "yellow",
+            "Low": "gray",
+            "Informational": "lightgray"
+        };
+
+        // Prepare the data for the pie chart
+        const data = rows.map(row => ({
+            label: row.protocol,
+            value: row.count,
+            severity: row.vulnerability_info >= 9.0 ? "Critical" :
+                row.vulnerability_info >= 7.0 ? "High" :
+                row.vulnerability_info >= 4.0 ? "Medium" :
+                row.vulnerability_info >= 0.1 ? "Low" : "Informational"
+        }));
+
+        // Create a D3Node instance to render the pie chart
+        const width = 800;
+        const height = 400;
+        const d3n = new D3Node();
+
+        // Create the pie chart using D3.js
+        const svg = d3n.createSVG(width, height);
+
+        const radius = Math.min(width, height) / 2;
+        const pie = d3n.d3.pie().value(d => d.value);
+        const arc = d3n.d3.arc().outerRadius(radius).innerRadius(radius / 2);
+
+        // Use a color scale to assign colors based on severity
+        const colorScale = d3n.d3.scaleOrdinal()
+            .domain(Object.keys(colorMap))
+            .range(Object.values(colorMap));
+
+        const g = svg.append('g').attr('transform', `translate(${width / 2},${height / 2})`);
+
+        const arcs = g.selectAll('arc')
+            .data(pie(data))
+            .enter()
+            .append('g')
+            .attr('class', 'arc');
+
+        arcs.append('path')
+            .attr('d', arc)
+            .attr('fill', d => colorScale(d.data.severity)); // Use severity to determine the fill color
+
+        // Convert the SVG to a string
+        const svgString = d3n.svgString();
+
+        // Send the SVG as a response
+        res.setHeader('Content-Type', 'image/svg+xml');
+        res.status(200).send(svgString);
+    });
+});
+
 
 
 
@@ -285,6 +370,58 @@ router.get('/pie-chart', (req, res) => {
 // ...
 
 
+// ...
+
+// GET a specific vulnerability by ID
+router.get('/vulnerabilities/:id', (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+
+    const id = req.params.id;
+
+    // Modify the SQL query to retrieve a specific vulnerability by ID
+    const selectQuery = "SELECT * FROM vulnerabilities WHERE id = ?";
+
+    detectedVulnerabilitiesDB.get(selectQuery, [id], (err, row) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+
+        if (!row) {
+            return res.status(404).json({ error: "Vulnerability not found for the provided ID" });
+        }
+
+        res.status(200).json(row);
+    });
+});
+
+// GET all vulnerabilities
+// GET all vulnerabilities with pagination
+// GET all vulnerabilities with pagination
+router.get('/vulnerabilities', (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+
+    // Extract query parameters for pagination
+    const page = req.query.page || 1; // Default to page 1 if not specified
+    const perPage = 20; // Number of records per page
+
+    // Calculate the offset based on the page number
+    const offset = (page - 1) * perPage;
+
+    // Modify the SQL query to include pagination
+    const selectQuery = "SELECT * FROM vulnerabilities LIMIT ? OFFSET ?";
+
+    detectedVulnerabilitiesDB.all(selectQuery, [perPage, offset], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+
+        res.status(200).json(rows);
+    });
+});
+
+
+
+// ...
 
 
 

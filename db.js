@@ -3,9 +3,12 @@ const path = require("path");
 
 // Path to the captured_packets.db file
 const capturedPacketsDBPath = path.join(
-  "D:",
-  "express - Backend - Imesh",
-  "backend",
+  "C:",
+  "Users",
+  "Imesh",
+  "Desktop",
+  "IT20246396  Reserch",
+  "backend-nd-dev",
   "captured_packets.db"
 );
 
@@ -34,9 +37,13 @@ db.run(createPacketsTableQuery, (err) => {
 
 // Path to the detected_vulnerabilities.db file
 const detectedVulnerabilitiesDBPath = path.join(
-  "D:",
-  "express - Backend - Imesh",
-  "backend",
+  
+  "C:",
+  "Users",
+  "Imesh",
+  "Desktop",
+  "IT20246396  Reserch",
+  "backend-nd-dev",
   "detected_vulnerabilities.db"
 );
 

@@ -78,7 +78,8 @@ router.get('/vulnerabilities-chart', async (req, res) => {
 
         // Save the chart as an image file
         const imageFileName = 'vulnerabilities-chart.png';
-        const directoryPath = 'D:\\express - Backend - Imesh\\backend'; // Specify the directory path
+        const directoryPath = 'C:\\Users\\Imesh\\Pictures\\Screenshots';
+        // Specify the directory path
         const imagePath = path.join(directoryPath, imageFileName);
 
         const imageStream = fs.createWriteStream(imagePath);

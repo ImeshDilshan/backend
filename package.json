@@ -1,0 +1,25 @@
+{
+  "name": "sharerooms",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "nadula",
+  "license": "ISC",
+  "dependencies": {
+    "canvas": "^2.11.2",
+    "chart.js": "^4.3.3",
+    "chartjs-node-canvas": "^4.1.6",
+    "cors": "^2.8.5",
+    "d3": "^7.8.5",
+    "d3-node": "^3.0.0",
+    "express": "^4.18.2",
+    "moment": "^2.29.4",
+    "mongoose": "^7.3.1",
+    "nodemon": "^2.0.22",
+    "router": "^1.3.8",
+    "sqlite3": "^5.1.6"
+  }
+}

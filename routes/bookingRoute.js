@@ -17,6 +17,7 @@ const path = require('path');
 
 const router = express.Router();
 const app = express();
+const nodemailer = require('nodemailer');
 app.use(cors());
 
 
@@ -418,6 +419,43 @@ router.get('/vulnerabilities', (req, res) => {
         res.status(200).json(rows);
     });
 });
+
+router.post('/send-email', (req, res) => {
+    const { email, pdfDataUri } = req.body;
+  
+    // Set up a Nodemailer transporter
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user:'imeshrajakaruna04@gmail.com',
+         // Replace with your Gmail email
+        pass: 'dgasromelmsxtsrh', // Replace with your Gmail password
+      },
+    });
+
+    const mailOptions = {
+        from: 'dilshanimesh09@gmail.com', // Replace with your Gmail email
+        to: email,
+        subject: 'Security Incidents PDF Report',
+        text: 'Please find the PDF report attached.',
+        attachments: [
+          {
+            filename: 'security_incidents.pdf',
+            content: pdfDataUri.split(';base64,').pop(),
+            encoding: 'base64',
+          },
+        ],
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error('Error sending email:', error);
+          return res.status(500).json({ error: 'Failed to send email' });
+        }
+        console.log('Email sent:', info.response);
+        return res.status(200).json({ message: 'Email sent successfully' });
+      });
+    });
 
 
 

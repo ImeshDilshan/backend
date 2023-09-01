@@ -2,15 +2,7 @@ const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
 
 // Path to the captured_packets.db file
-const capturedPacketsDBPath = path.join(
-  "C:",
-  "Users",
-  "Imesh",
-  "Desktop",
-  "IT20246396  Reserch",
-  "backend-nd-dev",
-  "captured_packets.db"
-);
+const capturedPacketsDBPath = path.join("/home/ubuntu/backend/captured_packets.db");
 
 // Create a new SQLite database instance for captured_packets.db
 const db = new sqlite3.Database(capturedPacketsDBPath);
@@ -36,16 +28,7 @@ db.run(createPacketsTableQuery, (err) => {
 });
 
 // Path to the detected_vulnerabilities.db file
-const detectedVulnerabilitiesDBPath = path.join(
-  
-  "C:",
-  "Users",
-  "Imesh",
-  "Desktop",
-  "IT20246396  Reserch",
-  "backend-nd-dev",
-  "detected_vulnerabilities.db"
-);
+const detectedVulnerabilitiesDBPath = path.join("/home/ubuntu/backend/detected_vulnerabilities.db");
 
 // Create a new SQLite database instance for detected_vulnerabilities.db
 const detectedVulnerabilitiesDB = new sqlite3.Database(

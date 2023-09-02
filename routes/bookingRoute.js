@@ -46,9 +46,17 @@ function categorizeVulnerabilities(vulnerabilities) {
 
     return Object.values(categories);
 }
-
 router.get('/vulnerabilities-chart', async (req, res) => {
     res.header("Access-Control-Allow-Origin", "*");
+
+    // Debug: Log current working directory before and after change
+    console.log('Current working directory before change:', process.cwd());
+
+    // Change the current working directory to /home/ubuntu/backend
+    process.chdir('/home/ubuntu/backend');
+
+    // Debug: Log current working directory after change
+    console.log('Current working directory after change:', process.cwd());
 
     // Fetch data from the vulnerabilities table
     const selectQuery = "SELECT vulnerability_info FROM vulnerabilities";
@@ -93,9 +101,7 @@ router.get('/vulnerabilities-chart', async (req, res) => {
 
         // Save the chart as an image file
         const imageFileName = 'vulnerabilities-chart.png';
-        const directoryPath = 'C:\\Users\\Imesh\\Pictures\\Screenshots';
-        // Specify the directory path
-        const imagePath = path.join(directoryPath, imageFileName);
+        const imagePath = '/home/ubuntu/backend/' + imageFileName; // Define the full path
 
         const imageStream = fs.createWriteStream(imagePath);
         const chartImage = canvas.createPNGStream();
@@ -110,6 +116,8 @@ router.get('/vulnerabilities-chart', async (req, res) => {
         });
     });
 });
+
+
 
 router.get('/pie-chart/:id', (req, res) => {
     res.header("Access-Control-Allow-Origin", "*");

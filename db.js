@@ -17,12 +17,21 @@ const db = new sqlite3.Database(capturedPacketsDBPath);
 
 // Define a schema for the 'packets' table
 const createPacketsTableQuery = `
-    CREATE TABLE IF NOT EXISTS packets (
+CREATE TABLE IF NOT EXISTS likes_dislikes (
+  client_ip TEXT PRIMARY KEY,
+  like BOOLEAN,
+  dislike BOOLEAN
+)
+
+`;
+
+// Define a schema for the 'likes_dislikes' table
+const createLikesDislikesTableQuery = `
+    CREATE TABLE IF NOT EXISTS likes_dislikes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        protocol TEXT,
-        source TEXT,
-        destination TEXT,
-        length INTEGER
+        packet_id INTEGER,
+        like BOOLEAN,
+        dislike BOOLEAN
     )
 `;
 
@@ -35,9 +44,17 @@ db.run(createPacketsTableQuery, (err) => {
   }
 });
 
+// Create the 'likes_dislikes' table
+db.run(createLikesDislikesTableQuery, (err) => {
+  if (err) {
+    console.error("Error creating 'likes_dislikes' table:", err.message);
+  } else {
+    console.log("'likes_dislikes' table created or already exists");
+  }
+});
+
 // Path to the detected_vulnerabilities.db file
 const detectedVulnerabilitiesDBPath = path.join(
-  
   "C:",
   "Users",
   "Imesh",
@@ -78,8 +95,6 @@ const createVulnerabilitiesTableQuery = `
     destination TEXT,
     vulnerability_info REAL
 )
-
-    
 `;
 
 // Create the 'vulnerabilities' table

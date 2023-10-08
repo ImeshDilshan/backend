@@ -228,6 +228,93 @@ router.post('/', (req, res) => {
 // ...
 
 // ...
+
+// Like a packet
+router.post('/like/:packetId', (req, res) => {
+    const packetId = req.params.packetId;
+
+    // Insert a new record into the likes_dislikes table to indicate a like
+    const insertQuery = "INSERT INTO likes_dislikes (packet_id, like, dislike) VALUES (?, 1, 0)";
+
+    capturedPacketsDB.run(insertQuery, [packetId], function (err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.status(201).json({ message: 'Packet liked successfully' });
+    });
+});
+
+// Dislike a packet
+router.post('/dislike/:packetId', (req, res) => {
+    const packetId = req.params.packetId;
+
+    // Insert a new record into the likes_dislikes table to indicate a dislike
+    const insertQuery = "INSERT INTO likes_dislikes (packet_id, like, dislike) VALUES (?, 0, 1)";
+
+    capturedPacketsDB.run(insertQuery, [packetId], function (err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.status(201).json({ message: 'Packet disliked successfully' });
+    });
+});
+
+
+// Get the number of likes for a packet
+router.post('/like/:clientIp', (req, res) => {
+    const clientIp = req.params.clientIp;
+
+    // Insert the client's IP and like information into the likes_dislikes table
+    const insertQuery = "INSERT INTO likes_dislikes (client_ip, like, dislike) VALUES (?, 1, 0)";
+    capturedPacketsDB.run(insertQuery, [clientIp], (err) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+
+        res.status(200).send("Liked packet successfully.");
+    });
+});
+
+router.post('/dislike/:clientIp', (req, res) => {
+    const clientIp = req.params.clientIp;
+
+    // Insert the client's IP and dislike information into the likes_dislikes table
+    const insertQuery = "INSERT INTO likes_dislikes (client_ip, like, dislike) VALUES (?, 0, 1)";
+    capturedPacketsDB.run(insertQuery, [clientIp], (err) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+
+        res.status(200).send("Disliked packet successfully.");
+    });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 router.get('/graph/:id', (req, res) => {
     res.header("Access-Control-Allow-Origin", "*");
     const id = req.params.id;

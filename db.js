@@ -12,10 +12,44 @@ const capturedPacketsDBPath = path.join(
   "captured_packets.db"
 );
 
-// Create a new SQLite database instance for captured_packets.db
+const newvulnarabilities = path.join(
+  "C:",
+  "Users",
+  "Imesh",
+  "Desktop",
+  "IT20246396  Reserch",
+  "backend-nd-dev",
+  "NEWvulnerabilities.db"
+);
+
+
+const newvulnarabilitie= new sqlite3.Database(newvulnarabilities);
+
+
+
+const newvulnarabilitiesTableQuery = `
+    CREATE TABLE IF NOT EXISTS newvulnarabilities (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    protocol TEXT,
+    source TEXT,
+    destination TEXT,
+    length INTEGER,
+    vulnerability_info TEXT
+)
+`;
+
+
+newvulnarabilitie.run(newvulnarabilitiesTableQuery, (err) => {
+  if (err) {
+    console.error("Error creating 'newvulnarabilities' table:", err.message);
+  } else {
+    console.log("'newvulnarabilities' table created or already exists");
+  }
+});
+
+
 const db = new sqlite3.Database(capturedPacketsDBPath);
 
-// Define a schema for the 'packets' table
 const createPacketsTableQuery = `
 CREATE TABLE IF NOT EXISTS likes_dislikes (
   client_ip TEXT PRIMARY KEY,
@@ -110,4 +144,12 @@ detectedVulnerabilitiesDB.run(createVulnerabilitiesTableQuery, (err) => {
 module.exports = {
   capturedPacketsDB: db,
   detectedVulnerabilitiesDB: detectedVulnerabilitiesDB,
+ newWal : newvulnarabilitie,
 };
+
+
+
+
+
+
+

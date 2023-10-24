@@ -4,6 +4,7 @@ const express = require('express');
 const cors = require('cors');
 const { capturedPacketsDB } = require('../db');
 const { detectedVulnerabilitiesDB } = require('../db');
+const{ newWal} = require('../db');
 // const router = express.Router();
 const { createCanvas } = require('canvas');
 const Chart = require('chart.js/auto');
@@ -110,6 +111,26 @@ router.get('/vulnerabilities-chart', async (req, res) => {
         });
     });
 });
+
+router.get('/data',async(req,res)=>{
+    req.header("Access-Control-Allow-Origin", "*");
+    
+    const page = req.query.page || 1; // Default to page 1 if not specified
+    const perPage = 20; // Number of records per page
+    const offset = (page - 1) * perPage;
+    const selectQuery = "SELECT * FROM vulnerabilities LIMIT ? OFFSET ?";
+
+    newWal.all(selectQuery, [perPage, offset], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.status(200).json(rows);
+    });
+})
+
+
+
+
 
 router.get('/pie-chart/:id', (req, res) => {
     res.header("Access-Control-Allow-Origin", "*");

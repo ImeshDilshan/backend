@@ -184,8 +184,8 @@ router.get('/pie-chart/:id', (req, res) => {
         const data = rows.map(row => ({
             label: row.protocol,
             value: row.count,
-            severity: row.length >= 3000 ? "Critical" :
-                row.length >= 2000? "High" :
+            severity: row.length >= 2000 ? "Critical" :
+                row.length >= 1500? "High" :
                 row.length >= 1000 ? "Medium" :
                 row.length >= 500? "Low" : "Informational"
         }));

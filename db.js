@@ -135,9 +135,9 @@ const createVulnerabilitiesTableQuery = `
 // Create the 'vulnerabilities' table
 detectedVulnerabilitiesDB.run(createVulnerabilitiesTableQuery, (err) => {
   if (err) {
-    console.error("Error creating 'vulnerabilities' table:", err.message);
+    console.error("Error creating 'validation_severity' table:", err.message);
   } else {
-    console.log("'vulnerabilities' table created or already exists");
+    console.log("'validation_severity' table created or already exists");
   }
 });
 

@@ -32,9 +32,9 @@ function categorizeVulnerabilities(vulnerabilities) {
     };
 
     vulnerabilities.forEach((vulnerability) => {
-        if (vulnerability.length >= 3000) {
+        if (vulnerability.length >= 2000) {
             categories.Critical++;
-        } else if (vulnerability.length >= 2000) {
+        } else if (vulnerability.length >= 1500) {
             categories.High++;
         } else if (vulnerability.length >= 1000) {
             categories.Medium++;

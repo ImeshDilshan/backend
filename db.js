@@ -2,19 +2,62 @@ const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
 
 // Path to the captured_packets.db file
-const capturedPacketsDBPath = path.join("/home/ubuntu/backend/captured_packets.db");
+const capturedPacketsDBPath = path.join("/home/ubuntu/captured_packets.db");
 
-// Create a new SQLite database instance for captured_packets.db
+// const newvulnarabilities = path.join(
+//   "C:",
+//   "Users",
+//   "Imesh",
+//   "Desktop",
+//   "IT20246396  Reserch",
+//   "backend-nd-dev",
+//   "NEWvulnerabilities.db"
+// );
+const newvulnarabilities = path.join("/home/ubuntu/NEWvulnerabilities.db");
+
+const newvulnarabilitie= new sqlite3.Database(newvulnarabilities);
+
+
+
+const newvulnarabilitiesTableQuery = `
+    CREATE TABLE IF NOT EXISTS newvulnarabilities (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    protocol TEXT,
+    source TEXT,
+    destination TEXT,
+    length INTEGER,
+    vulnerability_info TEXT
+)
+`;
+
+
+newvulnarabilitie.run(newvulnarabilitiesTableQuery, (err) => {
+  if (err) {
+    console.error("Error creating 'newvulnarabilities' table:", err.message);
+  } else {
+    console.log("'newvulnarabilities' table created or already exists");
+  }
+});
+
+
 const db = new sqlite3.Database(capturedPacketsDBPath);
 
-// Define a schema for the 'packets' table
 const createPacketsTableQuery = `
-    CREATE TABLE IF NOT EXISTS packets (
+CREATE TABLE IF NOT EXISTS likes_dislikes (
+  client_ip TEXT PRIMARY KEY,
+  like BOOLEAN,
+  dislike BOOLEAN
+)
+
+`;
+
+// Define a schema for the 'likes_dislikes' table
+const createLikesDislikesTableQuery = `
+    CREATE TABLE IF NOT EXISTS likes_dislikes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        protocol TEXT,
-        source TEXT,
-        destination TEXT,
-        length INTEGER
+        packet_id INTEGER,
+        like BOOLEAN,
+        dislike BOOLEAN
     )
 `;
 
@@ -27,8 +70,26 @@ db.run(createPacketsTableQuery, (err) => {
   }
 });
 
+// Create the 'likes_dislikes' table
+db.run(createLikesDislikesTableQuery, (err) => {
+  if (err) {
+    console.error("Error creating 'likes_dislikes' table:", err.message);
+  } else {
+    console.log("'likes_dislikes' table created or already exists");
+  }
+});
+
 // Path to the detected_vulnerabilities.db file
-const detectedVulnerabilitiesDBPath = path.join("/home/ubuntu/backend/detected_vulnerabilities.db");
+// const detectedVulnerabilitiesDBPath = path.join(
+//   "C:",
+//   "Users",
+//   "Imesh",
+//   "Desktop",
+//   "IT20246396  Reserch",
+//   "backend-nd-dev",
+//   "detected_vulnerabilities.db"
+// );
+const detectedVulnerabilitiesDBPath = path.join("/home/ubuntu/validation_severity.db");
 
 // Create a new SQLite database instance for detected_vulnerabilities.db
 const detectedVulnerabilitiesDB = new sqlite3.Database(
@@ -54,17 +115,23 @@ detectedVulnerabilitiesDB.run(createSqliteSequenceTableQuery, (err) => {
 
 // Define a schema for the 'vulnerabilities' table
 const createVulnerabilitiesTableQuery = `
-    CREATE TABLE IF NOT EXISTS vulnerabilities (
+    CREATE TABLE IF NOT EXISTS hi (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     protocol TEXT,
     source TEXT,
     destination TEXT,
-    vulnerability_info REAL
+    length INTEGER,
+    vulnerability_info TEXT,
+    severity TEXT
 )
-
-    
 `;
-
+    //     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    //     protocol TEXT,
+    //     source TEXT,
+    //     destination TEXT,
+    //     length INTEGER,
+    //     vulnerability_info TEXT,
+    //     severity TEXT
 // Create the 'vulnerabilities' table
 detectedVulnerabilitiesDB.run(createVulnerabilitiesTableQuery, (err) => {
   if (err) {
@@ -78,4 +145,12 @@ detectedVulnerabilitiesDB.run(createVulnerabilitiesTableQuery, (err) => {
 module.exports = {
   capturedPacketsDB: db,
   detectedVulnerabilitiesDB: detectedVulnerabilitiesDB,
+ newWal : newvulnarabilitie,
 };
+
+
+
+
+
+
+
